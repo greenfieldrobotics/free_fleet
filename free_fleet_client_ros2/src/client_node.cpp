@@ -62,6 +62,10 @@ ClientNode::ClientNode(const rclcpp::NodeOptions & options)
   declare_parameter("publish_frequency", client_node_config.publish_frequency);
   declare_parameter("max_dist_to_first_waypoint", client_node_config.max_dist_to_first_waypoint);
 
+  declare_parameter("gps_origin_long", client_node_config.gps_origin_long);
+  declare_parameter("gps_origin_lat", client_node_config.gps_origin_lat);
+
+
   // getting new values for parameters or keep defaults
   get_parameter("fleet_name", client_node_config.fleet_name);
   get_parameter("robot_name", client_node_config.robot_name);
@@ -82,6 +86,10 @@ ClientNode::ClientNode(const rclcpp::NodeOptions & options)
   get_parameter("update_frequency", client_node_config.update_frequency);
   get_parameter("publish_frequency", client_node_config.publish_frequency);
   get_parameter("max_dist_to_first_waypoint", client_node_config.max_dist_to_first_waypoint);
+
+  get_parameter("gps_origin_long", client_node_config.gps_origin_long);
+  get_parameter("gps_origin_lat", client_node_config.gps_origin_lat);
+
   print_config();
 
   ClientConfig client_config = client_node_config.get_client_config();
@@ -326,10 +334,12 @@ nav2_msgs::action::NavigateToPose::Goal ClientNode::location_to_nav_goal(
   goal.pose.header.frame_id = client_node_config.map_frame;
   goal.pose.header.stamp.sec = _location.sec;
   goal.pose.header.stamp.nanosec = _location.nanosec;
-  goal.pose.pose.position.x = _location.x;
-  goal.pose.pose.position.y = _location.y;
+  goal.pose.pose.position.x = toGPS_longitude( _location.x, client_node_config.gps_origin_long, client_node_config.gps_origin_lat);
+  goal.pose.pose.position.y = toGPS_latitude( _location.y, client_node_config.gps_origin_long, client_node_config.gps_origin_lat);
   goal.pose.pose.position.z = 0.0; // TODO: handle Z height with level
   goal.pose.pose.orientation = get_quat_from_yaw(_location.yaw);
+  RCLCPP_INFO(get_logger(), "converted goal x: %1f, y: %1f",
+    goal.pose.pose.position.x, goal.pose.pose.position.y);  
   return goal;
 }
 

@@ -71,5 +71,37 @@ bool is_pose_close(
   return true;
 }
 
+double toGPS_longitude(double x, double long_origin_, double lat_origin_){
+  return x/mdeglon(lat_origin_) + long_origin_;
+}
+
+double toGPS_latitude(double y, double long_origin_, double lat_origin_){
+  return y/mdeglat(lat_origin_) + lat_origin_;
+}
+
+double toUTM_x(double longitude, double long_origin_, double lat_origin_){
+  return (longitude - long_origin_) * mdeglon(lat_origin_);
+}
+double toUTM_y(double latitude, double long_origin_, double lat_origin_){
+  return (latitude - long_origin_) * mdeglat(lat_origin_);
+}
+
+double mdeglat(double lat){
+    double latrad = lat*2.0*M_PI/360.0 ;
+    double dy = - 111132.09 - 566.05 * cos(2.0*latrad) \
+         + 1.20 * cos(4.0*latrad) \
+         - 0.002 * cos(6.0*latrad);
+    return dy;
+}
+
+double mdeglon(double lat){
+    double latrad = lat*2.0*M_PI/360.0 ;
+    double dx = - 111415.13 * cos(latrad) \
+         - 94.55 * cos(3.0*latrad) \
+	     + 0.12 * cos(5.0*latrad);
+    return dx;
+}
+
+
 } // namespace ros2
 } // namespace free_fleet

@@ -34,6 +34,12 @@ bool is_pose_close(
     const geometry_msgs::msg::PoseStamped& pose_1,
     const geometry_msgs::msg::PoseStamped& pose_2);
 
+double toGPS_longitude(double x, double long_origin_, double lat_origin_);
+double toGPS_latitude(double y, double long_origin_, double lat_origin_);
+double toUTM_x(double longitude, double long_origin_, double lat_origin_);
+double toUTM_y(double latitude, double long_origin_, double lat_origin_);
+double mdeglat(double lat);
+double mdeglon(double lat);
 } // namespace ros2
 } // namespace free_fleet
 
