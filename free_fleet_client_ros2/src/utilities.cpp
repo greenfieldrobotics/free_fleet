@@ -83,7 +83,7 @@ double toUTM_x(double longitude, double long_origin_, double lat_origin_){
   return (longitude - long_origin_) * mdeglon(lat_origin_);
 }
 double toUTM_y(double latitude, double long_origin_, double lat_origin_){
-  return (latitude - long_origin_) * mdeglat(lat_origin_);
+  return (latitude - lat_origin_) * mdeglat(lat_origin_);
 }
 
 double mdeglat(double lat){
