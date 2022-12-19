@@ -51,6 +51,9 @@ void ClientNodeConfig::print_config() const
   printf("    path request: %s\n", dds_path_request_topic.c_str());
   printf("    destination request: %s\n", 
       dds_destination_request_topic.c_str());
+  printf("    gps_origin_long: %1f\n", gps_origin_long);
+  printf("    gps_origin_lat: %1f\n", gps_origin_lat);
+
   fflush(stdout);
 }
   

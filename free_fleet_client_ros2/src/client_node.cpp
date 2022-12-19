@@ -62,6 +62,10 @@ ClientNode::ClientNode(const rclcpp::NodeOptions & options)
   declare_parameter("publish_frequency", client_node_config.publish_frequency);
   declare_parameter("max_dist_to_first_waypoint", client_node_config.max_dist_to_first_waypoint);
 
+  declare_parameter("gps_origin_long", client_node_config.gps_origin_long);
+  declare_parameter("gps_origin_lat", client_node_config.gps_origin_lat);
+
+
   // getting new values for parameters or keep defaults
   get_parameter("fleet_name", client_node_config.fleet_name);
   get_parameter("robot_name", client_node_config.robot_name);
@@ -82,6 +86,10 @@ ClientNode::ClientNode(const rclcpp::NodeOptions & options)
   get_parameter("update_frequency", client_node_config.update_frequency);
   get_parameter("publish_frequency", client_node_config.publish_frequency);
   get_parameter("max_dist_to_first_waypoint", client_node_config.max_dist_to_first_waypoint);
+
+  get_parameter("gps_origin_long", client_node_config.gps_origin_long);
+  get_parameter("gps_origin_lat", client_node_config.gps_origin_lat);
+
   print_config();
 
   ClientConfig client_config = client_node_config.get_client_config();
@@ -263,7 +271,7 @@ void ClientNode::publish_robot_state()
     /// RMF expects battery to have a percentage in the range for 0-100.
     /// sensor_msgs/BatteryInfo on the other hand returns a value in
     /// the range of 0-1
-    new_robot_state.battery_percent = 100 * current_battery_state.percentage;
+    new_robot_state.battery_percent = 100; // current_battery_state.percentage;
   }
 
   {
@@ -288,8 +296,10 @@ void ClientNode::publish_robot_state()
           messages::Location{
               (int32_t)goal_path[i].goal.pose.header.stamp.sec,
               goal_path[i].goal.pose.header.stamp.nanosec,
-              (float)goal_path[i].goal.pose.pose.position.x,
-              (float)goal_path[i].goal.pose.pose.position.y,
+              // (float)goal_path[i].goal.pose.pose.position.x,
+              (float)toUTM_x(goal_path[i].goal.pose.pose.position.x, client_node_config.gps_origin_long, client_node_config.gps_origin_lat),
+              // (float)goal_path[i].goal.pose.pose.position.y,
+              (float)toUTM_y(goal_path[i].goal.pose.pose.position.y, client_node_config.gps_origin_long, client_node_config.gps_origin_lat),
               (float)get_yaw_from_pose(goal_path[i].goal.pose),
               goal_path[i].level_name
           });
@@ -326,10 +336,12 @@ nav2_msgs::action::NavigateToPose::Goal ClientNode::location_to_nav_goal(
   goal.pose.header.frame_id = client_node_config.map_frame;
   goal.pose.header.stamp.sec = _location.sec;
   goal.pose.header.stamp.nanosec = _location.nanosec;
-  goal.pose.pose.position.x = _location.x;
-  goal.pose.pose.position.y = _location.y;
+  goal.pose.pose.position.x = toGPS_longitude( _location.x, client_node_config.gps_origin_long, client_node_config.gps_origin_lat);
+  goal.pose.pose.position.y = toGPS_latitude( _location.y, client_node_config.gps_origin_long, client_node_config.gps_origin_lat);
   goal.pose.pose.position.z = 0.0; // TODO: handle Z height with level
   goal.pose.pose.orientation = get_quat_from_yaw(_location.yaw);
+  RCLCPP_INFO(get_logger(), "converted goal long: %1f, lat: %1f",goal.pose.pose.position.x, goal.pose.pose.position.y);  
+  RCLCPP_INFO(get_logger(), "local goal x: %1f, y: %1f",_location.x, _location.y);  
   return goal;
 }
 
@@ -430,6 +442,8 @@ bool ClientNode::read_path_request()
           path_request.path[0].y -
           current_robot_pose.pose.position.y;
       const double dist_to_first_waypoint = sqrt(dx*dx + dy*dy);
+      RCLCPP_INFO(get_logger(), "Current position of robot: x: %1f, y: %1f",current_robot_pose.pose.position.x, current_robot_pose.pose.position.y);  
+      RCLCPP_INFO(get_logger(), "Path position: x: %1f, y: %1f",path_request.path[0].x, path_request.path[0].y);  
 
       RCLCPP_INFO(get_logger(), "distance to first waypoint: %.2f\n", dist_to_first_waypoint);
 
