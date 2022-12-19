@@ -271,7 +271,7 @@ void ClientNode::publish_robot_state()
     /// RMF expects battery to have a percentage in the range for 0-100.
     /// sensor_msgs/BatteryInfo on the other hand returns a value in
     /// the range of 0-1
-    new_robot_state.battery_percent = 100 * current_battery_state.percentage;
+    new_robot_state.battery_percent = 100; // current_battery_state.percentage;
   }
 
   {
@@ -296,8 +296,10 @@ void ClientNode::publish_robot_state()
           messages::Location{
               (int32_t)goal_path[i].goal.pose.header.stamp.sec,
               goal_path[i].goal.pose.header.stamp.nanosec,
-              (float)goal_path[i].goal.pose.pose.position.x,
-              (float)goal_path[i].goal.pose.pose.position.y,
+              // (float)goal_path[i].goal.pose.pose.position.x,
+              (float)toUTM_x(goal_path[i].goal.pose.pose.position.x, client_node_config.gps_origin_long, client_node_config.gps_origin_lat),
+              // (float)goal_path[i].goal.pose.pose.position.y,
+              (float)toUTM_y(goal_path[i].goal.pose.pose.position.y, client_node_config.gps_origin_long, client_node_config.gps_origin_lat),
               (float)get_yaw_from_pose(goal_path[i].goal.pose),
               goal_path[i].level_name
           });
@@ -338,8 +340,8 @@ nav2_msgs::action::NavigateToPose::Goal ClientNode::location_to_nav_goal(
   goal.pose.pose.position.y = toGPS_latitude( _location.y, client_node_config.gps_origin_long, client_node_config.gps_origin_lat);
   goal.pose.pose.position.z = 0.0; // TODO: handle Z height with level
   goal.pose.pose.orientation = get_quat_from_yaw(_location.yaw);
-  RCLCPP_INFO(get_logger(), "converted goal x: %1f, y: %1f",
-    goal.pose.pose.position.x, goal.pose.pose.position.y);  
+  RCLCPP_INFO(get_logger(), "converted goal long: %1f, lat: %1f",goal.pose.pose.position.x, goal.pose.pose.position.y);  
+  RCLCPP_INFO(get_logger(), "local goal x: %1f, y: %1f",_location.x, _location.y);  
   return goal;
 }
 
@@ -440,6 +442,8 @@ bool ClientNode::read_path_request()
           path_request.path[0].y -
           current_robot_pose.pose.position.y;
       const double dist_to_first_waypoint = sqrt(dx*dx + dy*dy);
+      RCLCPP_INFO(get_logger(), "Current position of robot: x: %1f, y: %1f",current_robot_pose.pose.position.x, current_robot_pose.pose.position.y);  
+      RCLCPP_INFO(get_logger(), "Path position: x: %1f, y: %1f",path_request.path[0].x, path_request.path[0].y);  
 
       RCLCPP_INFO(get_logger(), "distance to first waypoint: %.2f\n", dist_to_first_waypoint);
 
