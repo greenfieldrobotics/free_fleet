@@ -10,7 +10,7 @@
     <param name="robot_model" value="weedbot"/>
     <param name="level_name" value="L1"/>
     <param name="dds_domain" value="32"/>
-    <param name="max_dist_to_first_waypoint" value="20.0"/>
+    <param name="max_dist_to_first_waypoint" value="100.0"/>
     <param name="map_frame" value="map"/>
     <param name="robot_frame" value="robot99/base_link"/>
     <param name="nav2_server_name" value="/robot99/navigate_to_pose"/>
