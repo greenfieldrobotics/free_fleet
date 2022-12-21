@@ -1,9 +1,13 @@
 <?xml version='1.0' ?>
 <launch>
   <!-- #################### UPDATE FIELDS HERE ####################### -->
-  <arg name="robot_name" default="robot99"/>
-  <arg name="gps_origin_lat" default="-97.761207654808402"/>
-  <arg name="gps_origin_long" default="37.619905110634598"/>
+  <!-- export ROBOT_NAME="robot99" -->
+  <!-- export LAT_ORIGIN=37.619905110634598 -->
+  <!-- export LONG_ORIGIN=-97.761207654808402  -->
+  
+  <arg name="robot_name" default="$(env ROBOT_NAME)"/>
+  <arg name="gps_origin_lat" default="$(env LAT_ORIGIN)"/>
+  <arg name="gps_origin_long" default="$(env LONG_ORIGIN)"/>
   <!-- ############################################################### -->
   <node name="weedbot_free_fleet_client_node" pkg="free_fleet_client_ros2"
       exec="free_fleet_client_ros2" output="both">
