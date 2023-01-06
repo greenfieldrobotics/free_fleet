@@ -336,8 +336,8 @@ nav2_msgs::action::NavigateToPose::Goal ClientNode::location_to_nav_goal(
   goal.pose.header.frame_id = client_node_config.map_frame;
   goal.pose.header.stamp.sec = _location.sec;
   goal.pose.header.stamp.nanosec = _location.nanosec;
-  goal.pose.pose.position.x = toGPS_longitude( _location.x, client_node_config.gps_origin_long, client_node_config.gps_origin_lat);
-  goal.pose.pose.position.y = toGPS_latitude( _location.y, client_node_config.gps_origin_long, client_node_config.gps_origin_lat);
+  goal.pose.pose.position.x = toGPS_longitude( -_location.x, client_node_config.gps_origin_long, client_node_config.gps_origin_lat);
+  goal.pose.pose.position.y = toGPS_latitude( -_location.y, client_node_config.gps_origin_long, client_node_config.gps_origin_lat);
   goal.pose.pose.position.z = 0.0; // TODO: handle Z height with level
   goal.pose.pose.orientation = get_quat_from_yaw(_location.yaw);
   RCLCPP_INFO(get_logger(), "converted goal long: %1f, lat: %1f",goal.pose.pose.position.x, goal.pose.pose.position.y);  
